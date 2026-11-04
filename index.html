@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Virada | Controle Financeiro</title>
+<style>
+:root{--bg:#0b1220;--panel:#121e30;--line:#26364c;--text:#edf3fa;--muted:#91a3b9;--green:#39d49a;--red:#ff727c;--blue:#70a9ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+header{padding:24px 5%;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:21px;font-weight:800;letter-spacing:1px}
+.logo span{color:var(--green)}
+.status{color:var(--green);font-size:12px}
+main{max-width:1150px;margin:auto;padding:28px 20px}
+h1{font-size:27px;margin:0 0 8px}
+.sub{color:var(--muted);margin-bottom:25px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:19px}
+.card small{color:var(--muted)}
+.value{font-size:25px;font-weight:750;margin-top:12px}
+.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}
+.section{margin-top:26px}
+.section h2{font-size:18px;margin-bottom:14px}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ai{border:1px solid #315b53;background:#102a29;border-radius:13px;padding:20px}
+.ai h3{margin:0 0 10px;color:var(--green)}
+.ai p{color:#d0e8df;line-height:1.6;font-size:14px}
+button{background:var(--green);color:#071a15;border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
+button.secondary{background:#25364d;color:var(--text)}
+input,select{background:#0b1626;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px;width:100%;margin:6px 0 13px}
+label{font-size:12px;color:var(--muted)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:13px 9px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+.empty{color:var(--muted);padding:18px 0;font-size:13px}
+.footer{color:var(--muted);font-size:11px;text-align:center;padding:30px}
+@media(max-width:750px){.grid{grid-template-columns:1fr 1fr}.columns{grid-template-columns:1fr}header{padding:18px}.value{font-size:21px}}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">PROJETO <span>VIRADA</span></div>
+  <div class="status">● Sistema iniciado</div>
+</header>
+<main>
+  <h1>Seu recomeço financeiro começa aqui.</h1>
+  <div class="sub">Controle familiar • Organização • Recuperação financeira</div>
+
+  <div class="grid">
+    <div class="card"><small>Saldo registrado</small><div class="value blue" id="balance">R$ 0,00</div></div>
+    <div class="card"><small>Total de receitas</small><div class="value green" id="income">R$ 0,00</div></div>
+    <div class="card"><small>Total de despesas</small><div class="value red" id="expenses">R$ 0,00</div></div>
+    <div class="card"><small>Dívidas cadastradas</small><div class="value" id="debtTotal">R$ 0,00</div></div>
+  </div>
+
+  <div class="section">
+    <div class="ai">
+      <h3>✦ Assistente financeiro — Projeto Virada</h3>
+      <p id="advice">Olá! Vamos começar organizando suas receitas, despesas e dívidas. Quando tivermos os dados, poderemos construir um plano realista de recuperação financeira para os próximos seis meses.</p>
+      <button onclick="analyze()">Analisar minha situação</button>
+    </div>
+  </div>
+
+  <div class="columns section">
+    <div class="card">
+      <h2>＋ Nova movimentação</h2>
+      <label>Descrição</label>
+      <input id="description" placeholder="Ex.: Corrida Uber, salário, combustível">
+      <div class="formgrid">
+        <div><label>Valor (R$)</label><input id="amount" type="number" min="0.01" step="0.01" placeholder="0,00"></div>
+        <div><label>Tipo</label><select id="type"><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
+      </div>
+      <button onclick="addTransaction()">Registrar movimentação</button>
+    </div>
+    <div class="card">
+      <h2>＋ Cadastrar dívida</h2>
+      <label>Nome da dívida</label>
+      <input id="debtName" placeholder="Ex.: Cartão de crédito">
+      <div class="formgrid">
+        <div><label>Valor total (R$)</label><input id="debtAmount" type="number" min="0.01" step="0.01" placeholder="0,00"></div>
+        <div><label>Parcela mensal (R$)</label><input id="installment" type="number" min="0" step="0.01" placeholder="0,00"></div>
+      </div>
+      <button onclick="addDebt()">Cadastrar dívida</button>
+    </div>
+  </div>
+
+  <div class="columns section">
+    <div class="card">
+      <h2>Movimentações recentes</h2>
+      <div id="transactions"><div class="empty">Nenhuma movimentação cadastrada.</div></div>
+    </div>
+    <div class="card">
+      <h2>Minhas dívidas</h2>
+      <div id="debts"><div class="empty">Nenhuma dívida cadastrada.</div></div>
+    </div>
+  </div>
+  <div class="footer">PROJETO VIRADA • Versão inicial de demonstração</div>
+</main>
+<script>
+const load=(key)=>JSON.parse(localStorage.getItem(key)||"[]");
+let transactions=load("virada_transactions");
+let debts=load("virada_debts");
+const money=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function save(){
+ localStorage.setItem("virada_transactions",JSON.stringify(transactions));
+ localStorage.setItem("virada_debts",JSON.stringify(debts));
+ render();
+}
+function addTransaction(){
+ const description=document.getElementById("description").value.trim();
+ const amount=Number(document.getElementById("amount").value);
+ const type=document.getElementById("type").value;
+ if(!description||amount<=0){alert("Informe a descrição e um valor válido.");return}
+ transactions.unshift({description,amount,type,date:new Date().toLocaleDateString("pt-BR")});
+ document.getElementById("description").value="";
+ document.getElementById("amount").value="";
+ save();
+}
+function addDebt(){
+ const name=document.getElementById("debtName").value.trim();
+ const amount=Number(document.getElementById("debtAmount").value);
+ const installment=Number(document.getElementById("installment").value);
+ if(!name||amount<=0){alert("Informe o nome e o valor da dívida.");return}
+ debts.push({name,amount,installment});
+ document.getElementById("debtName").value="";
+ document.getElementById("debtAmount").value="";
+ document.getElementById("installment").value="";
+ save();
+}
+function render(){
+ const income=transactions.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+ const expenses=transactions.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+ const debtTotal=debts.reduce((s,d)=>s+d.amount,0);
+ document.getElementById("income").textContent=money(income);
+ document.getElementById("expenses").textContent=money(expenses);
+ document.getElementById("balance").textContent=money(income-expenses);
+ document.getElementById("debtTotal").textContent=money(debtTotal);
+ document.getElementById("transactions").innerHTML=transactions.length?
+ "<table><tr><th>Descrição</th><th>Data</th><th>Valor</th></tr>"+
+ transactions.slice(0,10).map(t=>`<tr><td>${escapeHTML(t.description)}</td><td>${t.date}</td><td class="${t.type==="income"?"green":"red"}">${t.type==="income"?"+":"−"} ${money(t.amount)}</td></tr>`).join("")+"</table>":
+ '<div class="empty">Nenhuma movimentação cadastrada.</div>';
+ document.getElementById("debts").innerHTML=debts.length?
+ "<table><tr><th>Dívida</th><th>Parcela</th><th>Total</th></tr>"+
+ debts.map(d=>`<tr><td>${escapeHTML(d.name)}</td><td>${money(d.installment)}</td><td class="red">${money(d.amount)}</td></tr>`).join("")+"</table>":
+ '<div class="empty">Nenhuma dívida cadastrada.</div>';
+}
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function analyze(){
+ const income=transactions.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+ const expenses=transactions.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+ const total=debts.reduce((s,d)=>s+d.amount,0);
+ let msg;
+ if(!transactions.length&&!debts.length)msg="Ainda não temos dados suficientes. Comece cadastrando suas receitas, despesas e dívidas.";
+ else if(income-expenses<0)msg="Atenção: suas despesas registradas superam suas receitas. Precisamos priorizar despesas essenciais e negociar dívidas antes de definir pagamentos extras.";
+ else msg="Seu saldo registrado é "+money(income-expenses)+". Suas dívidas cadastradas somam "+money(total)+". Vamos levantar juros, vencimentos, renda familiar e despesas essenciais para montar um plano de seis meses responsável.";
+ document.getElementById("advice").textContent=msg;
+}
+render();
+</script>
+</body>
+</html>
