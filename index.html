@@ -5,6 +5,18 @@
 <title>Projeto Virada | Controle Financeiro</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--line:#26364c;--text:#edf3fa;--muted:#91a3b9;--green:#39d49a;--red:#ff727c;--blue:#70a9ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}header{padding:24px 5%;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.logo{font-size:21px;font-weight:800;letter-spacing:1px}.logo span{color:var(--green)}.status{color:var(--green);font-size:12px}main{max-width:1150px;margin:auto;padding:28px 20px}h1{font-size:27px;margin:0 0 8px}.sub{color:var(--muted);margin-bottom:25px;font-size:14px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:19px}.card small{color:var(--muted)}.value{font-size:25px;font-weight:750;margin-top:12px}.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.section{margin-top:26px}.section h2{font-size:18px;margin-bottom:14px}.columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}.ai{border:1px solid #315b53;background:#102a29;border-radius:13px;padding:20px}.ai h3{margin:0 0 10px;color:var(--green)}.ai p{color:#d0e8df;line-height:1.6;font-size:14px}button{background:var(--green);color:#071a15;border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}button:disabled{opacity:.6;cursor:wait}button.secondary{background:#25364d;color:var(--text)}input,select{background:#0b1626;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px;width:100%;margin:6px 0 13px}label{font-size:12px;color:var(--muted)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:13px 9px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:500}.empty{color:var(--muted);padding:18px 0;font-size:13px}.footer{color:var(--muted);font-size:11px;text-align:center;padding:30px}.auth{max-width:420px;margin:40px auto}.notice{padding:12px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:13px;margin:12px 0;white-space:pre-wrap}.hidden{display:none!important}.top-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.scroll{overflow-x:auto}@media(max-width:750px){.grid{grid-template-columns:1fr 1fr}.columns{grid-template-columns:1fr}header{padding:18px}.value{font-size:21px}}@media(max-width:420px){.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}}
+
+.plan-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.plan-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.plan-result{margin-top:16px}
+.plan-result h3{color:var(--green)}
+.plan-result p,.plan-result li{font-size:14px;line-height:1.55}
+.plan-note{color:var(--muted);font-size:12px;line-height:1.5}
+.plan-table{overflow-x:auto}
+.plan-table input{min-width:85px;max-width:130px;margin:0}
+.plan-table td{vertical-align:middle}
+.plan-strong{font-weight:700;color:var(--green)}
+@media(max-width:750px){.plan-layout,.plan-kpis{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -15,6 +27,35 @@
 <section id="dashboard" class="hidden"><h1>Seu recomeço financeiro começa aqui.</h1><div class="sub">Controle familiar • Organização • Recuperação financeira</div><div id="appMessage" class="notice">Ambiente de testes: use apenas dados fictícios até validarmos a segurança.</div>
 <div class="grid"><div class="card"><small>Saldo registrado</small><div class="value blue" id="balance">R$ 0,00</div></div><div class="card"><small>Total de receitas</small><div class="value green" id="income">R$ 0,00</div></div><div class="card"><small>Total de despesas</small><div class="value red" id="expenses">R$ 0,00</div></div><div class="card"><small>Dívidas cadastradas</small><div class="value" id="debtTotal">R$ 0,00</div></div></div>
 <div class="section"><div class="ai"><h3>✦ Assistente financeiro — Projeto Virada</h3><p id="advice">Olá! Vamos começar organizando suas receitas, despesas e dívidas. Quando tivermos os dados, poderemos construir um plano realista de recuperação financeira para os próximos seis meses.</p><button id="analyzeButton">Analisar minha situação</button></div></div>
+
+<div class="section" id="recoverySection">
+  <div class="card">
+    <h2>🎯 Plano de Recuperação Financeira</h2>
+    <p class="sub">Simule quanto sua família consegue pagar por mês e receba uma estratégia por dívida. Os dados mensais abaixo são diferentes dos totais de lançamentos do painel.</p>
+    <div class="plan-layout">
+      <div>
+        <label for="monthlyIncome">Renda familiar mensal líquida (R$)</label>
+        <input id="monthlyIncome" type="number" min="0" step="0.01" placeholder="Ex.: 8000">
+        <label for="monthlyEssential">Despesas mensais, sem parcelas das dívidas abaixo (R$)</label>
+        <input id="monthlyEssential" type="number" min="0" step="0.01" placeholder="Moradia, alimentação, transporte...">
+        <label for="monthlyReserve">Reserva mensal para imprevistos (R$)</label>
+        <input id="monthlyReserve" type="number" min="0" step="0.01" value="0">
+      </div>
+      <div>
+        <label for="planMode">Como definir o prazo?</label>
+        <select id="planMode"><option value="auto">Calcular prazo realista</option><option value="target">Escolher uma meta</option></select>
+        <div id="targetWrap" class="hidden"><label for="targetMonths">Prazo desejado (meses)</label><input id="targetMonths" type="number" min="1" max="360" value="6"></div>
+        <p class="plan-note">Informe as despesas sem repetir parcelas de dívidas cadastradas. O valor disponível será usado primeiro nas parcelas mínimas e depois na amortização de dívidas prioritárias.</p>
+        <button id="generatePlan" type="button">Gerar meu plano de recuperação</button>
+      </div>
+    </div>
+    <h3>Juros das dívidas cadastradas</h3>
+    <p class="plan-note">Preencha a taxa mensal conhecida. Deixe em branco quando não souber: o sistema fará uma simulação sem juros para essa dívida e avisará que o resultado é incompleto.</p>
+    <div id="planDebtRates" class="plan-table"><div class="empty">Cadastre dívidas para montar a projeção.</div></div>
+    <div id="planOutput" class="plan-result" aria-live="polite"></div>
+    <p class="plan-note">Esta é uma simulação educativa, não uma renegociação bancária. Não considera automaticamente multas, CET, alterações de taxas, novos gastos, descontos de negociação nem amortizações específicas de contratos. Os dados desta simulação ficam apenas neste navegador; receitas e dívidas do painel continuam compartilhadas pelo Supabase.</p>
+  </div>
+</div>
 <div class="columns section"><div class="card"><h2>＋ Nova movimentação</h2><form id="transactionForm"><label>Descrição</label><input id="description" maxlength="200" required placeholder="Ex.: Corrida Uber, salário, combustível"><div class="formgrid"><div><label>Valor (R$)</label><input id="amount" type="number" min="0.01" step="0.01" required placeholder="0,00"></div><div><label>Tipo</label><select id="type"><option value="income">Receita</option><option value="expense">Despesa</option></select></div></div><button type="submit">Registrar movimentação</button></form></div><div class="card"><h2>＋ Cadastrar dívida</h2><form id="debtForm"><label>Nome da dívida</label><input id="debtName" maxlength="200" required placeholder="Ex.: Cartão de crédito"><div class="formgrid"><div><label>Valor total (R$)</label><input id="debtAmount" type="number" min="0.01" step="0.01" required placeholder="0,00"></div><div><label>Parcela mensal (R$)</label><input id="installment" type="number" min="0" step="0.01" placeholder="0,00"></div></div><button type="submit">Cadastrar dívida</button></form></div></div>
 <div class="columns section"><div class="card"><h2>Movimentações recentes</h2><div class="scroll" id="transactions"><div class="empty">Nenhuma movimentação cadastrada.</div></div></div><div class="card"><h2>Minhas dívidas</h2><div class="scroll" id="debts"><div class="empty">Nenhuma dívida cadastrada.</div></div></div></div><div class="footer">PROJETO VIRADA • Versão de testes com Supabase</div></section>
 </main>
@@ -31,17 +72,138 @@ const SUPABASE_KEY = 'sb_publishable_X6nkbvWsyhoCw_MVD7dcwQ_jTma6Doo';
 function show(section){for(const id of ['setup','login','dashboard'])$(id).classList.toggle('hidden',id!==section);$('logout').classList.toggle('hidden',section!=='dashboard');}
 function message(id,text){$(id).textContent=text;}
 function validConfig(url,key){try{const u=new URL(url);return u.protocol==='https:'&&u.hostname.endsWith('.supabase.co')&&key.startsWith('sb_publishable_');}catch{return false;}}
-async function initialize(url,key){if(!validConfig(url,key))throw new Error('Informe uma Project URL e uma Publishable key válidas.');if(!window.supabase?.createClient)throw new Error('Não foi possível carregar a biblioteca Supabase. Verifique sua conexão.');db=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});const {data,error}=await db.auth.getSession();if(error)throw error;db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){householdId=null;transactions=[];debts=[];show('login');$('status').textContent='● Aguardando login';}else if(event==='SIGNED_IN'&&session){setTimeout(()=>loadDashboard(),0);}});if(data.session)await loadDashboard();else{show('login');$('status').textContent='● Aguardando login';}}
+async function initialize(url,key){if(!validConfig(url,key))throw new Error('Informe uma Project URL e uma Publishable key válidas.');if(!window.supabase?.createClient)throw new Error('Não foi possível carregar a biblioteca Supabase. Verifique sua conexão.');db=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});const {data,error}=await db.auth.getSession();if(error)throw error;db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){householdId=null;transactions=[];debts=[];$('planOutput').textContent='';show('login');$('status').textContent='● Aguardando login';}else if(event==='SIGNED_IN'&&session){setTimeout(()=>loadDashboard(),0);}});if(data.session)await loadDashboard();else{show('login');$('status').textContent='● Aguardando login';}}
 $('connect').addEventListener('click',async()=>{const url=$('projectUrl').value.trim(),key=$('publishableKey').value.trim();$('connect').disabled=true;try{await initialize(url,key);localStorage.setItem(configKey,JSON.stringify({url,key}));message('setupMessage','Conectado.');}catch(e){message('setupMessage','Erro: '+e.message);}finally{$('connect').disabled=false;}});
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(!db)return;const button=$('loginButton');button.disabled=true;message('loginMessage','Entrando...');try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;$('password').value='';await loadDashboard();}catch(err){message('loginMessage','Não foi possível entrar: '+err.message);}finally{button.disabled=false;}});
 $('logout').addEventListener('click',async()=>{if(db){const {error}=await db.auth.signOut();if(error)message('appMessage','Erro ao sair: '+error.message);}});
-async function loadDashboard(){if(!db)return;try{const {data:{user},error:authError}=await db.auth.getUser();if(authError||!user)throw authError||new Error('Sessão não encontrada.');const {data:members,error:memberError}=await db.from('household_members').select('household_id').eq('user_id',user.id).limit(2);if(memberError)throw memberError;if(!members?.length)throw new Error('Sua conta ainda não está vinculada a uma família.');if(members.length>1)throw new Error('Mais de uma família encontrada. Precisamos definir qual usar.');householdId=members[0].household_id;show('dashboard');$('status').textContent='● Conectado';await refreshData();}catch(err){show('login');message('loginMessage','Não foi possível carregar a família: '+err.message);$('status').textContent='● Verificar acesso';}}
-async function refreshData(){if(!db||!householdId)return;const [t,d]=await Promise.all([db.from('transactions').select('id,description,amount,type,transaction_date').eq('household_id',householdId).order('transaction_date',{ascending:false}).limit(500),db.from('debts').select('id,creditor,total_amount,monthly_installment,status').eq('household_id',householdId).order('created_at',{ascending:false}).limit(500)]);if(t.error||d.error){message('appMessage','Erro ao consultar dados: '+(t.error||d.error).message);return;}transactions=t.data||[];debts=d.data||[];render();message('appMessage','Ambiente de testes: use apenas valores fictícios até validarmos a segurança. Atualização automática a cada 15 segundos.');}
+async function loadDashboard(){if(!db)return;try{const {data:{user},error:authError}=await db.auth.getUser();if(authError||!user)throw authError||new Error('Sessão não encontrada.');const {data:members,error:memberError}=await db.from('household_members').select('household_id').eq('user_id',user.id).limit(2);if(memberError)throw memberError;if(!members?.length)throw new Error('Sua conta ainda não está vinculada a uma família.');if(members.length>1)throw new Error('Mais de uma família encontrada. Precisamos definir qual usar.');householdId=members[0].household_id;show('dashboard');$('status').textContent='● Conectado';await refreshData();restorePlanInputs();}catch(err){show('login');message('loginMessage','Não foi possível carregar a família: '+err.message);$('status').textContent='● Verificar acesso';}}
+async function refreshData(){if(!db||!householdId)return;const [t,d]=await Promise.all([db.from('transactions').select('id,description,amount,type,transaction_date').eq('household_id',householdId).order('transaction_date',{ascending:false}).limit(500),db.from('debts').select('id,creditor,total_amount,monthly_installment,status').eq('household_id',householdId).order('created_at',{ascending:false}).limit(500)]);if(t.error||d.error){message('appMessage','Erro ao consultar dados: '+(t.error||d.error).message);return;}transactions=t.data||[];debts=d.data||[];render();renderDebtRates();message('appMessage','Ambiente de testes: use apenas valores fictícios até validarmos a segurança. Atualização automática a cada 15 segundos.');}
 async function insertRecord(table,payload,form){if(!db||!householdId)return;const button=form.querySelector('button[type="submit"]');button.disabled=true;try{const {error}=await db.from(table).insert({...payload,household_id:householdId});if(error)throw error;form.reset();await refreshData();}catch(err){message('appMessage','Erro ao salvar: '+err.message);}finally{button.disabled=false;}}
 $('transactionForm').addEventListener('submit',e=>{e.preventDefault();const description=$('description').value.trim(),amount=Number($('amount').value),type=$('type').value;if(!description||!Number.isFinite(amount)||amount<=0||!['income','expense'].includes(type))return message('appMessage','Informe uma movimentação válida.');insertRecord('transactions',{description,amount,type},e.currentTarget);});
 $('debtForm').addEventListener('submit',e=>{e.preventDefault();const creditor=$('debtName').value.trim(),total_amount=Number($('debtAmount').value),monthly_installment=Number($('installment').value||0);if(!creditor||!Number.isFinite(total_amount)||total_amount<=0||!Number.isFinite(monthly_installment)||monthly_installment<0)return message('appMessage','Informe uma dívida válida.');insertRecord('debts',{creditor,total_amount,monthly_installment},e.currentTarget);});
 function render(){const income=transactions.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0),expenses=transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0),total=debts.reduce((s,d)=>s+Number(d.total_amount),0);$('income').textContent=money(income);$('expenses').textContent=money(expenses);$('balance').textContent=money(income-expenses);$('debtTotal').textContent=money(total);$('transactions').innerHTML=transactions.length?'<table><tr><th>Descrição</th><th>Data</th><th>Valor</th></tr>'+transactions.slice(0,10).map(t=>`<tr><td>${escapeHTML(t.description)}</td><td>${escapeHTML(t.transaction_date)}</td><td class="${t.type==='income'?'green':'red'}">${t.type==='income'?'+':'−'} ${money(t.amount)}</td></tr>`).join('')+'</table>':'<div class="empty">Nenhuma movimentação cadastrada.</div>';$('debts').innerHTML=debts.length?'<table><tr><th>Dívida</th><th>Parcela</th><th>Total</th></tr>'+debts.map(d=>`<tr><td>${escapeHTML(d.creditor)}</td><td>${money(d.monthly_installment)}</td><td class="red">${money(d.total_amount)}</td></tr>`).join('')+'</table>':'<div class="empty">Nenhuma dívida cadastrada.</div>';}
-$('analyzeButton').addEventListener('click',()=>{const income=transactions.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0),expenses=transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0),total=debts.reduce((s,d)=>s+Number(d.total_amount),0);$('advice').textContent=!transactions.length&&!debts.length?'Ainda não temos dados suficientes. Comece cadastrando suas receitas, despesas e dívidas fictícias para testar.':income-expenses<0?'Atenção: suas despesas registradas superam suas receitas. Precisamos priorizar despesas essenciais e negociar dívidas antes de definir pagamentos extras.':'Seu saldo registrado é '+money(income-expenses)+'. Suas dívidas cadastradas somam '+money(total)+'. Estes são totais de lançamentos, não uma projeção mensal. Para um plano de seis meses, ainda precisamos de juros, vencimentos e orçamento mensal.';});
+
+// Planejamento financeiro: simulação local; dados bancários não são transmitidos a serviços de IA.
+const planFields=['monthlyIncome','monthlyEssential','monthlyReserve','planMode','targetMonths'];
+function planStorageKey(){return 'virada_plan_inputs_'+(householdId||'none');}
+function restorePlanInputs(){
+  try {
+    const saved=JSON.parse(localStorage.getItem(planStorageKey())||'{}');
+    for(const id of planFields){if(saved[id]!==undefined)$(id).value=saved[id];}
+    $('targetWrap').classList.toggle('hidden',$('planMode').value!=='target');
+  } catch(e){console.warn('Não foi possível restaurar simulação.',e);}
+}
+function savePlanInputs(){
+  if(!householdId)return;
+  const values={};
+  for(const id of planFields)values[id]=$(id).value;
+  localStorage.setItem(planStorageKey(),JSON.stringify(values));
+}
+function rateKey(){return 'virada_plan_rates_'+(householdId||'none');}
+function savedRates(){try{return JSON.parse(localStorage.getItem(rateKey())||'{}');}catch{return {};}}
+function renderDebtRates(){
+  const holder=$('planDebtRates');
+  if(!debts.length){holder.innerHTML='<div class="empty">Cadastre dívidas para montar a projeção.</div>';return;}
+  const rates=savedRates();
+  holder.innerHTML='<table><thead><tr><th>Dívida</th><th>Saldo</th><th>Parcela informada</th><th>Juros ao mês (%)</th></tr></thead><tbody>'+
+    debts.map(d=>`<tr><td>${escapeHTML(d.creditor)}</td><td>${money(d.total_amount)}</td><td>${money(d.monthly_installment)}</td><td><input type="number" min="0" max="100" step="0.01" data-rate-id="${escapeHTML(d.id)}" aria-label="Juros mensais de ${escapeHTML(d.creditor)}" placeholder="Não sei" value="${rates[d.id]??''}"></td></tr>`).join('')+'</tbody></table>';
+}
+$('planDebtRates').addEventListener('change',e=>{
+  const el=e.target;
+  if(!el.matches('[data-rate-id]'))return;
+  const rates=savedRates();
+  if(el.value==='')delete rates[el.dataset.rateId];
+  else if(Number.isFinite(Number(el.value))&&Number(el.value)>=0&&Number(el.value)<=100)rates[el.dataset.rateId]=el.value;
+  else {alert('Informe juros entre 0 e 100% ao mês.');return;}
+  localStorage.setItem(rateKey(),JSON.stringify(rates));
+});
+$('planMode').addEventListener('change',()=>{
+  $('targetWrap').classList.toggle('hidden',$('planMode').value!=='target');
+  savePlanInputs();
+});
+for(const id of planFields)$(id).addEventListener('change',savePlanInputs);
+function simulatePlan(items,capacity,maxMonths){
+  const balances=items.map(d=>Math.max(0,Number(d.total_amount)||0));
+  const history=[],payments=items.map(()=>0);
+  for(let month=1;month<=maxMonths;month++){
+    let interest=0;
+    for(let i=0;i<items.length;i++){
+      if(balances[i]>0){const charge=balances[i]*items[i].rate;balances[i]+=charge;interest+=charge;}
+    }
+    let budget=capacity;
+    const paid=items.map(()=>0);
+    // Primeiro: pagamentos mensais previstos, até o saldo de cada dívida.
+    for(let i=0;i<items.length;i++){
+      const amount=Math.min(balances[i],Math.max(0,Number(items[i].monthly_installment)||0));
+      if(amount>budget+0.001)return {feasible:false,reason:'O orçamento não cobre todas as parcelas informadas.',month};
+      balances[i]-=amount;budget-=amount;paid[i]+=amount;
+    }
+    // Depois: amortização extra na maior taxa conhecida.
+    const order=items.map((_,i)=>i).sort((a,b)=>items[b].rate-items[a].rate || balances[a]-balances[b]);
+    for(const i of order){
+      const extra=Math.min(budget,balances[i]);
+      balances[i]-=extra;budget-=extra;paid[i]+=extra;
+    }
+    for(let i=0;i<items.length;i++)payments[i]+=paid[i];
+    const remaining=balances.reduce((a,b)=>a+b,0);
+    history.push({month,remaining,interest,paid:paid.reduce((a,b)=>a+b,0),byDebt:paid});
+    if(remaining<0.01)return {feasible:true,months:month,history,payments,remaining:0};
+    if(month>2&&remaining>=history[month-2].remaining-0.01&&capacity<=interest+0.01){
+      return {feasible:false,reason:'Os juros e compromissos impedem a redução consistente da dívida.',history,remaining};
+    }
+  }
+  return {feasible:false,reason:'O prazo máximo da simulação foi atingido.',history,remaining:balances.reduce((a,b)=>a+b,0)};
+}
+function generateRecoveryPlan(){
+  savePlanInputs();
+  const out=$('planOutput');
+  const rawIncome=$('monthlyIncome').value,rawEssential=$('monthlyEssential').value;
+  if(rawIncome===''||rawEssential===''){out.textContent='Informe sua renda mensal e suas despesas mensais para calcular a capacidade de pagamento.';return;}
+  const income=Number(rawIncome),essential=Number(rawEssential),reserve=Number($('monthlyReserve').value);
+  if([income,essential,reserve].some(v=>!Number.isFinite(v)||v<0)){out.textContent='Informe valores mensais válidos, sem números negativos.';return;}
+  if(!debts.length){out.textContent='Cadastre ao menos uma dívida para gerar um plano.';return;}
+  const capacity=income-essential-reserve;
+  const total=debts.reduce((sum,d)=>sum+Number(d.total_amount||0),0);
+  const minimum=debts.reduce((sum,d)=>sum+Number(d.monthly_installment||0),0);
+  const rates=savedRates();
+  const items=debts.map(d=>({...d,rate:rates[d.id]===undefined?0:Number(rates[d.id])/100}));
+  const unknown=items.filter(d=>rates[d.id]===undefined).map(d=>d.creditor);
+  const target=$('planMode').value==='target'?Number($('targetMonths').value):null;
+  if(target!==null&&(!Number.isInteger(target)||target<1||target>360)){out.textContent='Escolha um prazo entre 1 e 360 meses.';return;}
+  let html=`<h3>Diagnóstico da família</h3><p>Renda mensal: <strong>${money(income)}</strong> · Despesas: <strong>${money(essential)}</strong> · Reserva: <strong>${money(reserve)}</strong>.</p><p>Disponível para dívidas: <strong>${money(capacity)}</strong>/mês. Parcelas cadastradas: <strong>${money(minimum)}</strong>/mês. Saldo devedor: <strong>${money(total)}</strong>.</p>`;
+  if(unknown.length)html+=`<p class="plan-note">⚠️ Taxas desconhecidas em ${unknown.length} dívida(s): ${unknown.map(escapeHTML).join(', ')}. A projeção considera 0% nessas dívidas, portanto pode subestimar o prazo e o custo.</p>`;
+  if(capacity<=0){
+    html+='<p><strong>Plano de estabilização:</strong> não há capacidade mensal para amortização. Priorize despesas essenciais, evite novas dívidas, revise gastos e negocie condições com os credores antes de assumir novas parcelas.</p>';
+    out.innerHTML=html;return;
+  }
+  if(capacity+0.001<minimum){
+    html+=`<p><strong>Orçamento insuficiente:</strong> faltam ${money(minimum-capacity)} por mês para cobrir as parcelas cadastradas. Não é responsável prometer quitação sem renegociar essas parcelas ou aumentar a sobra mensal.</p>`;
+    out.innerHTML=html;return;
+  }
+  const result=simulatePlan(items,capacity,360);
+  if(result.feasible)html+=`<p class="plan-strong">Prazo estimado: ${result.months} ${result.months===1?'mês':'meses'}.</p>`;
+  else html+=`<p><strong>Prazo ainda não viável:</strong> ${escapeHTML(result.reason)} É necessário rever juros, pagamentos ou renegociar.</p>`;
+  if(target!==null){
+    const projected=result.history[Math.min(target,result.history.length)-1];
+    html+=`<p><strong>Meta escolhida: ${target} meses.</strong> ${result.feasible&&result.months<=target?'A simulação indica que a meta pode ser alcançada nas condições informadas.':`Saldo projetado ao fim da meta: ${money(projected?.remaining??total)}. A meta não está demonstrada como viável.`}</p>`;
+  }
+  if(result.history?.length){
+    const shown=result.history.slice(0,target??Math.min(result.history.length,24));
+    html+='<h3>Projeção mês a mês</h3><div class="plan-table"><table><thead><tr><th>Mês</th><th>Pagamento</th><th>Juros simulados</th><th>Saldo restante</th></tr></thead><tbody>'+
+      shown.map(h=>`<tr><td>${h.month}</td><td>${money(h.paid)}</td><td>${money(h.interest)}</td><td>${money(h.remaining)}</td></tr>`).join('')+'</tbody></table></div>';
+    if((target??result.history.length)>shown.length)html+='<p class="plan-note">A tabela mostra apenas os primeiros meses; a estimativa considera até 360 meses.</p>';
+    html+='<h3>Prioridade de pagamento</h3><p>Reserve primeiro os pagamentos mensais informados e direcione o valor extra às dívidas com maior taxa de juros conhecida. Confirme regras de amortização, multas e condições com cada credor antes de pagar antecipadamente.</p>';
+    html+='<div class="plan-table"><table><thead><tr><th>Dívida</th><th>Juros informados</th><th>Parcela</th></tr></thead><tbody>'+
+      [...items].sort((a,b)=>b.rate-a.rate).map(d=>`<tr><td>${escapeHTML(d.creditor)}</td><td>${rates[d.id]===undefined?'Não informados':(d.rate*100).toLocaleString('pt-BR')+'% a.m.'}</td><td>${money(d.monthly_installment)}</td></tr>`).join('')+'</tbody></table></div>';
+  }
+  html+='<p class="plan-note">Estimativa baseada em saldos atuais, juros mensais constantes e pagamentos mensais. Não substitui conferência dos contratos. Valores registrados como movimentações no painel não são automaticamente interpretados como renda mensal.</p>';
+  out.innerHTML=html;
+}
+$('generatePlan').addEventListener('click',generateRecoveryPlan);
+$('analyzeButton').addEventListener('click',()=>{
+  $('recoverySection').scrollIntoView({behavior:'smooth',block:'start'});
+  $('advice').textContent='Seu plano agora é calculado na seção abaixo. Informe renda e despesas mensais, confira juros e clique em “Gerar meu plano de recuperação”.';
+});
 (async()=>{try{const config=JSON.parse(JSON.stringify({url:SUPABASE_URL,key:SUPABASE_KEY})||'null');if(config?.url&&config?.key){$('projectUrl').value=config.url;$('publishableKey').value=config.key;await initialize(config.url,config.key);}else show('setup');}catch(err){show('setup');message('setupMessage','Verifique a configuração: '+err.message);}})();
 refreshTimer=setInterval(()=>{if(!$('dashboard').classList.contains('hidden'))refreshData();},15000);
 </script>
