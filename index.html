@@ -17,7 +17,7 @@
 .plan-table td{vertical-align:middle}
 .plan-strong{font-weight:700;color:var(--green)}
 @media(max-width:750px){.plan-layout,.plan-kpis{grid-template-columns:1fr}}
-</style>
+.action-btn{padding:7px 9px;font-size:12px;margin:2px;background:#25364d;color:var(--text)}.action-btn.danger{color:#ff9aa3}.action-cell{white-space:nowrap}</style>
 </head>
 <body>
 <header><div class="logo">PROJETO <span>VIRADA</span></div><div class="top-actions"><div class="status" id="status">● Aguardando configuração</div><button id="logout" class="secondary hidden">Sair</button></div></header>
@@ -81,8 +81,76 @@ async function refreshData(){if(!db||!householdId)return;const [t,d]=await Promi
 async function insertRecord(table,payload,form){if(!db||!householdId)return;const button=form.querySelector('button[type="submit"]');button.disabled=true;try{const {error}=await db.from(table).insert({...payload,household_id:householdId});if(error)throw error;form.reset();await refreshData();}catch(err){message('appMessage','Erro ao salvar: '+err.message);}finally{button.disabled=false;}}
 $('transactionForm').addEventListener('submit',e=>{e.preventDefault();const description=$('description').value.trim(),amount=Number($('amount').value),type=$('type').value;if(!description||!Number.isFinite(amount)||amount<=0||!['income','expense'].includes(type))return message('appMessage','Informe uma movimentação válida.');insertRecord('transactions',{description,amount,type},e.currentTarget);});
 $('debtForm').addEventListener('submit',e=>{e.preventDefault();const creditor=$('debtName').value.trim(),total_amount=Number($('debtAmount').value),monthly_installment=Number($('installment').value||0);if(!creditor||!Number.isFinite(total_amount)||total_amount<=0||!Number.isFinite(monthly_installment)||monthly_installment<0)return message('appMessage','Informe uma dívida válida.');insertRecord('debts',{creditor,total_amount,monthly_installment},e.currentTarget);});
-function render(){const income=transactions.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0),expenses=transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0),total=debts.reduce((s,d)=>s+Number(d.total_amount),0);$('income').textContent=money(income);$('expenses').textContent=money(expenses);$('balance').textContent=money(income-expenses);$('debtTotal').textContent=money(total);$('transactions').innerHTML=transactions.length?'<table><tr><th>Descrição</th><th>Data</th><th>Valor</th></tr>'+transactions.slice(0,10).map(t=>`<tr><td>${escapeHTML(t.description)}</td><td>${escapeHTML(t.transaction_date)}</td><td class="${t.type==='income'?'green':'red'}">${t.type==='income'?'+':'−'} ${money(t.amount)}</td></tr>`).join('')+'</table>':'<div class="empty">Nenhuma movimentação cadastrada.</div>';$('debts').innerHTML=debts.length?'<table><tr><th>Dívida</th><th>Parcela</th><th>Total</th></tr>'+debts.map(d=>`<tr><td>${escapeHTML(d.creditor)}</td><td>${money(d.monthly_installment)}</td><td class="red">${money(d.total_amount)}</td></tr>`).join('')+'</table>':'<div class="empty">Nenhuma dívida cadastrada.</div>';}
-
+function render(){
+  const income=transactions.filter(t=>t.type==='income').reduce((sum,t)=>sum+Number(t.amount),0);
+  const expenses=transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+Number(t.amount),0);
+  const total=debts.reduce((sum,d)=>sum+Number(d.total_amount),0);
+  $('income').textContent=money(income);$('expenses').textContent=money(expenses);
+  $('balance').textContent=money(income-expenses);$('debtTotal').textContent=money(total);
+  $('transactions').innerHTML=transactions.length?'<table><tr><th>Descrição</th><th>Data</th><th>Valor</th><th>Ações</th></tr>'+transactions.map(t=>`<tr><td>${escapeHTML(t.description)}</td><td>${escapeHTML(t.transaction_date)}</td><td class="${t.type==='income'?'green':'red'}">${t.type==='income'?'+':'−'} ${money(t.amount)}</td><td class="action-cell"><button class="action-btn" data-action="edit" data-kind="transaction" data-id="${escapeHTML(t.id)}">Editar</button><button class="action-btn danger" data-action="delete" data-kind="transaction" data-id="${escapeHTML(t.id)}">Excluir</button></td></tr>`).join('')+'</table>':'<div class="empty">Nenhuma movimentação cadastrada.</div>';
+  $('debts').innerHTML=debts.length?'<table><tr><th>Dívida</th><th>Parcela</th><th>Total</th><th>Ações</th></tr>'+debts.map(d=>`<tr><td>${escapeHTML(d.creditor)}</td><td>${money(d.monthly_installment)}</td><td class="red">${money(d.total_amount)}</td><td class="action-cell"><button class="action-btn" data-action="edit" data-kind="debt" data-id="${escapeHTML(d.id)}">Editar</button><button class="action-btn danger" data-action="delete" data-kind="debt" data-id="${escapeHTML(d.id)}">Excluir</button></td></tr>`).join('')+'</table>':'<div class="empty">Nenhuma dívida cadastrada.</div>';
+}
+function askNumber(label,oldValue,allowZero){
+  const raw=prompt(label,String(oldValue??0));
+  if(raw===null)return null;
+  const value=Number(raw.trim().replace(',','.'));
+  if(!raw.trim()||!Number.isFinite(value)||(allowZero?value<0:value<=0)){
+    alert('Digite um valor válido'+(allowZero?' (zero ou maior).':' (maior que zero).'));
+    return null;
+  }
+  return Math.round(value*100)/100;
+}
+async function manageRecord(kind,action,id,button){
+  if(!db||!householdId)return;
+  const isTransaction=kind==='transaction';
+  const list=isTransaction?transactions:debts;
+  const record=list.find(x=>String(x.id)===id);
+  if(!record)return message('appMessage','Registro não encontrado. Atualize a página.');
+  const table=isTransaction?'transactions':'debts';
+  let payload;
+  if(action==='delete'){
+    const name=isTransaction?record.description:record.creditor;
+    if(!confirm('Excluir definitivamente "'+name+'"? Esta ação não pode ser desfeita.'))return;
+  }else if(action==='edit'){
+    const name=prompt(isTransaction?'Descrição da movimentação:':'Nome da dívida:',isTransaction?record.description:record.creditor);
+    if(name===null)return;
+    if(!name.trim()||name.trim().length>200)return alert('Informe uma descrição de até 200 caracteres.');
+    const value=askNumber(isTransaction?'Valor da movimentação (R$):':'Valor total da dívida (R$):',isTransaction?record.amount:record.total_amount,false);
+    if(value===null)return;
+    if(isTransaction){
+      const type=prompt('Tipo: digite receita ou despesa',record.type==='income'?'receita':'despesa');
+      if(type===null)return;
+      const normalized=type.trim().toLowerCase();
+      if(!['receita','despesa'].includes(normalized))return alert('Digite receita ou despesa.');
+      payload={description:name.trim(),amount:value,type:normalized==='receita'?'income':'expense'};
+    }else{
+      const installment=askNumber('Parcela mensal da dívida (R$):',record.monthly_installment,true);
+      if(installment===null)return;
+      payload={creditor:name.trim(),total_amount:value,monthly_installment:installment};
+    }
+    if(!confirm('Salvar as alterações deste registro?'))return;
+  }else return;
+  button.disabled=true;
+  try{
+    let query=action==='delete'?db.from(table).delete():db.from(table).update(payload);
+    const {data,error}=await query.eq('household_id',householdId).eq('id',record.id).select('id');
+    if(error)throw error;
+    if(!data||data.length!==1)throw new Error('O banco não confirmou a alteração. Verifique as permissões de edição/exclusão (RLS) no Supabase.');
+    if(action==='delete'&&!isTransaction){
+      const rates=savedRates();delete rates[id];localStorage.setItem(rateKey(),JSON.stringify(rates));
+    }
+    await refreshData();
+    $('planOutput').textContent='Os registros mudaram. Clique em “Gerar meu plano de recuperação” para recalcular.';
+    message('appMessage',action==='delete'?'Registro excluído com sucesso.':'Registro atualizado com sucesso.');
+  }catch(error){message('appMessage','Não foi possível '+(action==='delete'?'excluir':'editar')+': '+error.message);}
+  finally{button.disabled=false;}
+}
+for(const section of ['transactions','debts']){
+  $(section).addEventListener('click',event=>{
+    const button=event.target.closest('button[data-action][data-kind][data-id]');
+    if(button)manageRecord(button.dataset.kind,button.dataset.action,button.dataset.id,button);
+  });
+}
 // Planejamento financeiro: simulação local; dados bancários não são transmitidos a serviços de IA.
 const planFields=['monthlyIncome','monthlyEssential','monthlyReserve','planMode','targetMonths'];
 function planStorageKey(){return 'virada_plan_inputs_'+(householdId||'none');}
